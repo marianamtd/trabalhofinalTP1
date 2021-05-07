@@ -8,6 +8,7 @@ const int QTD_MAX = 50;
 void menu_listagem();
 void lista_categoria();
 void lista_descricao();
+void abate_estoque();
 
 struct Produto {
   int codigo;
@@ -19,12 +20,14 @@ struct Produto {
 
 void inclui_produto()
 {
-  int qtd;
+  int qtd, contador = 0;
 
   // Pergunta quantos produtos serao cadastrados
   do {
     printf("Quantidade de produtos: ");
     scanf("%d", &qtd);
+
+    contador += qtd;
 
     if (qtd <= 0)
       puts("Valor invalido");    
@@ -73,6 +76,12 @@ void inclui_produto()
     } while (produto[i].preco <= 0);
   }
 }
+
+void abate_estoque()
+{
+  
+}
+
 
 void menu_principal()
 {
