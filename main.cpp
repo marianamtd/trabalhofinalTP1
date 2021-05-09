@@ -7,186 +7,130 @@
 const int QTD_MAX = 50;
 const int MAX_LEN = 30;
 
-//declaração das funções
-void menu_listagem();
-void lista_categoria();
-void lista_descricao();
-void abate_estoque();
-void aplica_aumento_desconto();
-void exclui_produto();
-
 struct Produto {
     int codigo;
-    char descricao[MAX_LEN];
+    char descricao[MAX_LEN] = {0};
     char categoria;
     int quantidade;
     float preco;
 };
 
-// funções que leem os dados do inclui_produtos
-void le_codigo(Produto produto[], int qtd, int i)
+void listar_por_descricao(Produto produto[], int max_len, int &qtd)
 {
-    int j;
-    int codigo_prod;
+    char temp[MAX_LEN];
+    // int i;
 
-    // Le o codigo do produto
-    do 
+    bool trocou = true;
+
+    produto[qtd].codigo = '\0';
+    for (int k = qtd-1; k>0 && trocou; k--)	
     {
-        printf("Codigo %d: ", i+1);
-        scanf("%d", &produto[i].codigo);
-
-        if (produto[i].codigo < 10000 || produto[i].codigo > 1000000)
-            puts("Codigo invalido: Insira novamente.");
-
-        codigo_prod = produto[i].codigo;
-        for (j = i; j > 0; j--)
+    trocou = false;
+    for (int i = 0; i < k; i++)
+        if (strcmp(produto[i].descricao, produto[i+1].descricao) > 0)
         {
-            if (codigo_prod == produto[j-1].codigo)
-            {
-                puts("Codigo ja existe no sistema");
-                printf("Codigo %d: ", i+1);
-                scanf("%d", &produto[i].codigo);
-                i--;
-            }
-        }
-    } while(produto[i].codigo < 10000 || produto[i].codigo > 1000000 || codigo_prod == produto[j-1].codigo);
-}
+            // descricao
+            strcpy(temp, produto[i+1].descricao);
+            strcpy(produto[i+1].descricao, produto[i].descricao);
+            strcpy(produto[i].descricao, temp);
 
-void le_descricao(Produto produto[], int qtd, int i)
-{
-    do {
-        printf("Descricao %d: ", i+1);
-        gets(produto[i].descricao);
+            // codigo
+            int temp2;
+            temp2 = produto[i+1].codigo;
+            produto[i+1].codigo = produto[i].codigo;
+            produto[i].codigo = temp2;
 
-        strupr(produto[i].descricao);
+            // categoria
+            char temp3;
+            temp3 = produto[i+1].categoria;
+            produto[i+1].categoria = produto[i].categoria;
+            produto[i].categoria = temp3;
+            trocou = true;
 
-        if (strlen(produto[i].descricao) < 4 || strlen(produto[i].descricao) > 30)
-            puts("Descricao invalida: Insira novamente.");
+            // quantidade
+            int temp4;
+            temp4 = produto[i+1].quantidade;
+            produto[i+1].quantidade = produto[i].quantidade;
+            produto[i].quantidade = temp4;
 
-    } while (strlen(produto[i].descricao) < 4 || strlen(produto[i].descricao) > 30);
+            // preco
+            float temp5;
+            temp2 = produto[i+1].preco;
+            produto[i+1].preco = produto[i].preco;
+            produto[i].preco = temp5;
 
-    // imprime cada um pra conferir se ta tudo certo
-    for (int i = 0; i < qtd; i++)
-    {
-        puts(produto[i].descricao);
-    }
-}
-
-/* void le_categoria(Produto produto[], int qtd, int i)
-{
-    do
-    {
-        getchar();
-        printf("Categoria %d: ", i+1);
-        produto[i].categoria = getchar();
-
-        if (categoria != 'A' || categoria != 'a' || categoria != 'B' || categoria != 'b' || categoria != 'C' || categoria != 'c' || categoria != 'D' || categoria != 'd' || categoria != 'E' || categoria != 'e');
-            puts("Invalido");
-        
-    } while (categoria != 'A' || categoria != 'a' || categoria != 'B' || categoria != 'b' || categoria != 'C' || categoria != 'c' || categoria != 'D' || categoria != 'd' || categoria != 'E' || categoria != 'e');
-
-    for (int i = 0; i < qtd; i++)
-    {
-        printf("%c ", produto[i].categoria);
-    }
-} */
-
-void le_quantidade(Produto produto[], int qtd, int i)
-{
-    do
-    {
-        printf("Quantidade %d: ", i+1);
-        scanf("%d", &produto[i].quantidade);
-
-        if (produto[i].quantidade <= 0)
-            puts("Quantidade menor ou igual a 0.");
-        
-    } while (produto[i].quantidade <= 0);
-}
-
-void le_preco(Produto produto[], int qtd, int i)
-{
-    do
-    {
-        printf("Preco %d: ", i+1);
-        scanf("%f", &produto[i].preco);
-
-        if (produto[i].preco <= 0)
-            puts("Preco menor ou igual a 0.");
-        
-    } while (produto[i].preco <= 0);
-}
-
-void exclui_produto(Produto produto[], int qtd)
-{
-    int produto_excluir;
-
-    puts("Produto a excluir");
-    printf("Codigo: ");
-    scanf("%d", &produto_excluir);
-
-    int pos;
-    int existe = 0;
-    // loop para procurar esse codigo no vetor
-    for (int i = 0; i < qtd; i++)
-    {
-        if (produto_excluir == produto[i].codigo)
-        {
-            pos = i;
-            existe = 1;
-        }
-    }
-
-    if (existe == 1)
-    {
-        // se a quantidade for > 0, copia o proximo elemento para o atual
-        if (produto[pos].quantidade > 0)
-            printf("Produto descricao tem %d em estoque!", produto[pos].quantidade);
-        
-        else // if quantidade <= 0
-        {
-            for (int i = 0; i < qtd-1; i++)
-                produto[i].codigo = produto[i+1].codigo;
-
-            printf("Produto excluido com sucesso!");
+            trocou = true;
         }
     }
     
-    else
-        printf("Produto nao existe!");
-}
+    putchar('\n');
 
+    puts("--------------------------------------------------------");
+    puts("Codigo Descricao                      Categ  Qtd   Preco");
 
-void inclui_produto()
-{
-    int qtd;
-    // int codigo_prod;
-
-    printf("Quantidade de produtos: ");
-    scanf("%d", &qtd);
-
-    Produto produto[qtd];
-    // Produto produto[qtd];
-
+    puts("--------------------------------------------------------");
     for (int i = 0; i < qtd; i++)
     {
-        le_codigo(produto, qtd, i);
-        getchar();
-        le_descricao(produto, qtd, i);
-        // le_categoria(produto, qtd, i);
-        le_quantidade(produto, qtd, i);
-        le_preco(produto, qtd, i);
-        printf("Produto cadastrado com sucesso!\n");
-    } 
+        printf("%d %-30s   %c   %4d %.2f\n", produto[i].codigo, produto[i].descricao, produto[i].categoria, produto[i].quantidade, produto[i].preco);
+    }
+
+    puts("--------------------------------------------------------");   
 }
 
-// menu principal
-void menu_principal(Produto produto[], int qtd)
+/* --------------------------------------------------------
+Codigo Descricao Categ Qtd Preco
+--------------------------------------------------------
+999999 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx c 9999 9999,99
+999999 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx c 9999 9999,99
+999999 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx c 9999 9999,99
+999999 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx c 9999 9999,99
+-------------------------------------------------------- */
+
+// listagem dos produtos 
+void menu_listagem(Produto produto[], int max_len, int &qtd)
 {
+    printf("Menu da Listagem\n");
+    printf("1-Listar todos os produtos (ordenado por descricao)\n");
+    printf("2-Listar todos os produtos (ordenado por categoria/descricao\n");
+    printf("3-Listar produtos com estoque baixo\n");
+    printf("4-Voltar\n");
+
+    int operacao;
+    do
+    {
+        printf("Qual operacao voce deseja realizar? ");
+        scanf("%d", &operacao);
+
+        if (operacao != 1 && operacao != 2 && operacao != 3 && operacao != 4)
+            puts("Operacao invalida");
+        
+    } while (operacao != 1 && operacao != 2 && operacao != 3 && operacao != 4);
+    
+    switch (operacao)
+    {
+    case 1: // listar por ordem de descricao
+        listar_por_descricao(produto, max_len, qtd);
+        break;
+    
+    case 2: // listar por odem de categoria/descricao
+        break;
+
+    case 3: // listar por estoque baixo
+        break;
+
+    case 4: // voltar
+        break;
+    }
+}
+
+
+int main()
+{
+    Produto produto[QTD_MAX];
     int opcao;
     int codigo_prod;
+    int qtd;
 
-    //Produto produto[qtd];
     do
     {
         puts("\nMenu Principal");
@@ -203,23 +147,23 @@ void menu_principal(Produto produto[], int qtd)
         switch (opcao)
         {
         case 1: // incluir produto
-            inclui_produto();
+            inclui_produto(produto, QTD_MAX, qtd);
             break;
-        
+
         case 2: // excluir produto
-            exclui_produto(produto, qtd);
+            exclui_produto(produto, QTD_MAX, qtd);
             break;
 
         case 3: // abater do estoque
-
+            abate_estoque(produto, QTD_MAX, qtd);
             break;
 
         case 4: // listar produtos -> menu_listagem
-            
+            menu_listagem(produto, QTD_MAX, qtd);
             break;
 
         case 5: // menu aumento/desconto
-
+            aplica_aumento_desconto(produto);
             break;
 
         case 6: // fim
@@ -231,7 +175,3 @@ void menu_principal(Produto produto[], int qtd)
     } while (opcao != 6);
 }
 
-int main(Produto produto[], int qtd)
-{
-    menu_principal(produto, qtd);
-}
