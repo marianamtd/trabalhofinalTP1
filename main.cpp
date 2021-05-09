@@ -77,8 +77,9 @@ void listar_por_descricao(Produto produto[], int max_len, int &qtd)
     puts("--------------------------------------------------------");   
 }
 
- void listagem_estoque_baixo()   
+ void listagem_estoque_baixo(Produto produto[], int max_len, int &qtd)   
  {
+
    
  }
 /* --------------------------------------------------------
