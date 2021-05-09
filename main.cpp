@@ -79,8 +79,53 @@ void listar_por_descricao(Produto produto[], int max_len, int &qtd)
 
  void listagem_estoque_baixo(Produto produto[], int max_len, int &qtd)   
  {
+  int minima;
 
+  printf("Qtd minima: ");
+  scanf("%d", &minima);
+  printf("--------------------------------------------------------\n");
+
+  puts("Codigo Descricao                      Categ  Qtd   Preco");
+
+  printf("--------------------------------------------------------\n");
+
+  for (int i = 0; i < qtd; i++) // a partir daq a gnt muda   ok
+    {
+        printf("%d %-30s   %c   %4d %.2f\n", produto[i].codigo, produto[i].descricao, produto[i].categoria, produto[i].quantidade, produto[i].preco);
+    }
+     /*
+     primeiro a gente tem que fazer um for, igual que eu fiz no abte produtoa gente copia aquele
+     ai quando a gente contabilizar a quantidade que tem no estoque, a gente faz o if 
+     */
+     
+    puts("--------------------------------------------------------");   
+  
+    int cod;
+    int pos;
+    int existe_estoque = 0;
+
+  for (int i = 0; i < qtd; i++) {
    
+        if (cod == produto[i].codigo)
+        {
+            pos = i;
+            existe_estoque = 1;
+        }
+    }
+
+    if (existe_estoque == 1)
+    {
+        
+        
+    }
+
+    else {
+        printf("Produto nao existe!\n");
+    }
+
+
+
+
  }
 /* --------------------------------------------------------
 Codigo Descricao Categ Qtd Preco
