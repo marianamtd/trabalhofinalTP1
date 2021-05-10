@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <time.h>
 #include <ctype.h>
 
 const int QTD_MAX = 50;
@@ -15,14 +14,275 @@ struct Produto {
     float preco;
 };
 
+int busca_categoria (Produto produto[], char categoria)
+{
+    for (int i = 0; i < QTD_MAX; i++)
+        if (produto[i].categoria == categoria)
+            return 1;
+
+    return -1;
+}
+
+int busca_codigo (Produto produto[], int codigo)
+{
+    for (int i = 0; i < QTD_MAX; i++)
+        if (produto[i].codigo == codigo)
+            return 1;
+
+    return -1;
+}
+
+void aplica_aumento_desconto(Produto produto[])
+{
+    int codigo, x;
+    char operacao, categoria;
+    float aumento_perc, desconto_perc, preco, aumento, desconto, novo_preco;
+
+    //Buffer do teclado
+    getchar();
+
+    //Entrada do tipo de operação
+    printf("Qual operacao voce deseja realizar? (Digite A para Aumento ou D para Desconto): ");
+    scanf("%c", &operacao);
+
+    getchar();
+
+    //Em caso de operação inválida:
+    while (operacao != 'A' && operacao != 'D')
+    {
+        printf("Operacao invalida, insira-a novamente: ");
+        scanf("%c", &operacao);
+        getchar();
+    }
+
+    // Entrada do código do produto
+    printf("Informe o codigo do produto cujo valor sera aumentado/descontado (ou 0 para aumentar/descontar categoria): ");
+    scanf("%d", &codigo);
+
+    // Caso o código do produto seja inválido por não possuir 6 dígitos:
+    while (codigo <= 99999 && codigo != 0 || codigo >= 1000000)
+    {
+        printf("Codigo invalido, digite-o novamente: ");
+        scanf("%d", &codigo);
+    }
+
+    // Se o código possuir 6 dígitos
+    if (codigo > 99999 && codigo < 1000000)
+    {
+       // Chamada da função busca_codigo para verificar se há um produto com esse código
+       x = busca_codigo(produto, codigo);
+
+       // Caso não há o codigo:
+       while (x == -1)
+       {
+           printf("Codigo nao encontrado, informe-o novamente: ");
+           scanf("%d", &codigo);
+           x = busca_codigo(produto, codigo);
+       }
+
+       // Se há o código e é desejado realizar um aumento:
+       if (x == 1 && operacao == 'A')
+       {
+           printf("Produto encontrado! Insira seu aumento em %%: ");
+           scanf("%f", &aumento_perc);
+
+           //Valor do aumento inválido:
+           while (aumento_perc <= 0)
+           {
+               printf("%% de aumento invalido, informe-o novamente: ");
+               scanf("%f", &aumento_perc);
+           }
+
+           // Passar o preço do produto que tem o código informado para a variável preço
+           for (int i = 0; i < QTD_MAX; i++)
+                if (produto[i].codigo == codigo)
+                    preco = produto[i].preco;
+
+           // Cálculo do novo preço
+           aumento = preco * aumento_perc / 100;
+
+           novo_preco = preco + aumento;
+
+           //Passar o novo preço para o produto
+           for (int i = 0; i < QTD_MAX; i++)
+                if (produto[i].codigo == codigo)
+                    produto[i].preco = novo_preco;
+
+           printf("Preco do produto alterado com sucesso! (De %.2f para %.2f)", preco, novo_preco);
+       }
+
+       // Se há o código e é desejado realizar um aumento:
+       else if (x == 1 && operacao == 'D')
+       {
+           printf("Produto encontrado! Insira seu desconto em %%: ");
+           scanf("%f", &desconto_perc);
+
+           // Valor do desconto inválido:
+           while (desconto_perc <= 0)
+           {
+               printf("%% de desconto invalido, informe-o novamente: ");
+               scanf("%f", &desconto_perc);
+           }
+
+           // Passar o preço do produto que tem o código informado para a variável preço
+           for (int i = 0; i < QTD_MAX; i++)
+                if (produto[i].codigo == codigo)
+                    preco = produto[i].preco;
+
+           // Cálculo do novo preço
+           desconto = preco * desconto_perc / 100;
+
+           novo_preco = preco - desconto;
+
+           // Passar o novo preço para o produto
+           for (int i = 0; i < QTD_MAX; i++)
+                if (produto[i].codigo == codigo)
+                    produto[i].preco = novo_preco;
+
+           printf("Preco do produto alterado com sucesso! (De %.2f para %.2f)", preco, novo_preco);
+       }
+    }
+
+    // Se for desejado realizar a operação em uma categoria:
+    else if (codigo == 0)
+    {
+        int contador = 0;
+
+        printf("Insira a categoria a ser aumentada/descontada (A, B, C, D, E) ou T para alterar o valor de todos os produtos: ");
+        scanf("%c", &categoria);
+
+        //Categoria inválida
+        while (categoria != 'A' && categoria != 'B' && categoria != 'C' && categoria != 'D' && categoria != 'E' && categoria != 'T')
+        {
+            printf("Categoria invalida, insira-a novamente: ");
+            scanf("%c", &categoria);
+        }
+
+        /*Chamada da função busca_categoria para verificar se há um produto com a cateoria especificada. Isso também serve para caso queira
+          mudar o de todos os produtos, já que se há um produto em uma categoria, há um produto inserido no programa*/
+        x = busca_categoria (produto, categoria);
+
+        while (x == -1)
+        {
+            int decisao;
+
+            puts("Não há um produto com a categoria informada ou não há um produto no programa.");
+            printf("Insira 1 caso queira inserir outra categoria, ou 2 caso queira voltar ao menu principal para inserir um produto: ");
+            scanf("%d", &decisao);
+
+            while (decisao != 1 && decisao != 2)
+            {
+                printf("Valor invalido, insira 1 ou 2: ");
+                scanf("%d", &decisao);
+            }
+
+            if (decisao == 1)
+            {
+                printf("Insira uma categoria: ");
+                scanf("%c", &categoria);
+                x = busca_categoria (produto, categoria);
+            }
+
+            else
+                return;
+        }
+
+        if (x == 1)
+        {
+            //Se for uma categoria específica
+            if (categoria != 'T')
+            {
+                //Em caso de operação de aumento:
+                if (operacao == 'A')
+                {
+                    printf("Insira o aumento em %%: ");
+                    scanf("%f", aumento_perc);
+
+                    //Pegar o preço de cada produto da categoria desejada e atualizá-lo
+                    for (int i = 0; i < QTD_MAX; i++)
+                        if (produto[i].categoria == categoria)
+                            {
+                                contador++;
+                                preco = produto[i].preco;
+                                aumento = preco * aumento_perc / 100;
+                                novo_preco = preco + aumento;
+                                produto[i].preco = novo_preco;
+                            }
+
+                    printf("Valor dos produtos da categoria %c aumentados em %f%% porcento com sucesso!\nHouve um total de %d produtos cujo valores foram aumentados.", categoria, aumento_perc, contador);
+                }
+
+                //Em caso de operação de desconto:
+                if (operacao == 'D')
+                {
+                    printf("Insira o desconto em %%: ");
+                    scanf("%f", desconto_perc);
+
+                    //Pegar o preço de cada produto da categoria desejada e atualizá-lo
+                    for (int i = 0; i < QTD_MAX; i++)
+                        if (produto[i].categoria == categoria)
+                            {
+                                contador++;
+                                preco = produto[i].preco;
+                                desconto = preco * desconto_perc / 100;
+                                novo_preco = preco - desconto;
+                                produto[i].preco = novo_preco;
+                            }
+
+                    printf("Valor dos produtos da categoria %c descontados em %f%% com sucesso!\nHouve um total de %d produtos cujo valores foram descontados.", categoria, desconto_perc, contador);
+                }
+            }
+
+            //Caso queira alterar o preço de TODOS os produtos:
+            else if (categoria == 'T')
+            {
+                //Aumentar o preço de todos os produtos
+                if (operacao == 'A')
+                {
+                    printf("Insira o aumento em %%: ");
+                    scanf("%f", aumento_perc);
+
+                    //Pegar o preço de todos os produtos e atualizá-los
+                    for (int i = 0; i < QTD_MAX; i++)
+                        {
+                            contador++;
+                            preco = produto[i].preco;
+                            aumento = preco * aumento_perc / 100;
+                            novo_preco = preco + aumento;
+                            produto[i].preco = novo_preco;
+                        }
+
+                    printf("Valor de todos os produtos aumentados em %f%% com sucesso!\nHouve um total de %d produtos cujo valores foram aumentados.", aumento_perc, contador);
+                }
+
+                //Descontar o preço de todos os produtos
+                if (operacao == 'D')
+                {
+                    printf("Insira o desconto em %%: ");
+                    scanf("%f", desconto_perc);
+
+                    //Pegar o preço de todos os produtos e atualizá-los
+                    for (int i = 0; i < QTD_MAX; i++)
+                        {
+                            contador++;
+                            preco = produto[i].preco;
+                            desconto = preco * desconto_perc / 100;
+                            novo_preco = preco - desconto;
+                            produto[i].preco = novo_preco;
+                        }
+
+                    printf("Valor de todos os produtos descontados em %f%% com sucesso!\nHouve um total de %d produtos cujo valores foram descontados.", desconto_perc, contador);
+                }
+            }
+        }
+    }
+}
+
 void listar_por_descricao(Produto produto[], int max_len, int &qtd)
 {
     char temp[MAX_LEN];
-    // int i;
 
     bool trocou = true;
-
-    produto[qtd].codigo = '\0';
     for (int k = qtd-1; k>0 && trocou; k--)	
     {
     trocou = false;
@@ -71,62 +331,11 @@ void listar_por_descricao(Produto produto[], int max_len, int &qtd)
     puts("--------------------------------------------------------");
     for (int i = 0; i < qtd; i++)
     {
-        printf("%d %-30s   %c   %4d %.2f\n", produto[i].codigo, produto[i].descricao, produto[i].categoria, produto[i].quantidade, produto[i].preco);
+        printf("%d %-30s   %c   %4d %7.2f\n", produto[i].codigo, produto[i].descricao, produto[i].categoria, produto[i].quantidade, produto[i].preco);
     }
-
     puts("--------------------------------------------------------");   
 }
 
- void listagem_estoque_baixo(Produto produto[], int max_len, int &qtd)   
- {
-  int minima;
-
-  printf("Qtd minima: ");
-  scanf("%d", &minima);
-  printf("--------------------------------------------------------\n");
-
-  puts("Codigo Descricao                      Categ  Qtd   Preco");
-
-  printf("--------------------------------------------------------\n");
-
-  for (int i = 0; i < qtd; i++) // a partir daq a gnt muda   ok
-    {
-        printf("%d %-30s   %c   %4d %.2f\n", produto[i].codigo, produto[i].descricao, produto[i].categoria, produto[i].quantidade, produto[i].preco);
-    }
-     /*
-     primeiro a gente tem que fazer um for, igual que eu fiz no abte produtoa gente copia aquele
-     ai quando a gente contabilizar a quantidade que tem no estoque, a gente faz o if 
-     */
-     
-    puts("--------------------------------------------------------");   
-  
-    int cod;
-    int pos;
-    int existe_estoque = 0;
-
-  for (int i = 0; i < qtd; i++) {
-   
-        if (cod == produto[i].codigo)
-        {
-            pos = i;
-            existe_estoque = 1;
-        }
-    }
-
-    if (existe_estoque == 1)
-    {
-        
-        
-    }
-
-    else {
-        printf("Produto nao existe!\n");
-    }
-
-
-
-
- }
 /* --------------------------------------------------------
 Codigo Descricao Categ Qtd Preco
 --------------------------------------------------------
@@ -136,9 +345,104 @@ Codigo Descricao Categ Qtd Preco
 999999 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx c 9999 9999,99
 -------------------------------------------------------- */
 
+void listar_por_categoria(Produto produto[], int max_len, int qtd)
+{
+    char temp[MAX_LEN];
+    bool trocou = true;
+
+    for (int k = qtd-1; k>0 && trocou; k--)	
+    {
+        trocou = false;
+        for (int i = 0; i < k; i++)
+        {
+           if (produto[i+1].categoria < produto[i].categoria)
+            {
+                // descricao
+                strcpy(temp, produto[i+1].descricao);
+                strcpy(produto[i+1].descricao, produto[i].descricao);
+                strcpy(produto[i].descricao, temp);
+
+                // codigo
+                int temp2;
+                temp2 = produto[i+1].codigo;
+                produto[i+1].codigo = produto[i].codigo;
+                produto[i].codigo = temp2;
+
+                // categoria
+                char temp3;
+                temp3 = produto[i+1].categoria;
+                produto[i+1].categoria = produto[i].categoria;
+                produto[i].categoria = temp3;
+                trocou = true;
+
+                // quantidade
+                int temp4;
+                temp4 = produto[i+1].quantidade;
+                produto[i+1].quantidade = produto[i].quantidade;
+                produto[i].quantidade = temp4;
+
+                // preco
+                float temp5;
+                temp2 = produto[i+1].preco;
+                produto[i+1].preco = produto[i].preco;
+                produto[i].preco = temp5;
+
+                trocou = true;
+            } 
+        }      
+    }
+    
+    putchar('\n');
+
+    puts("--------------------------------------------------------");
+    puts("Codigo Descricao                      Categ  Qtd   Preco");
+
+    puts("--------------------------------------------------------");
+    for (int i = 0; i < qtd; i++)
+    {
+        printf("%d %-30s   %c   %4d %7.2f\n", produto[i].codigo, produto[i].descricao, produto[i].categoria, produto[i].quantidade, produto[i].preco);
+    }
+    puts("--------------------------------------------------------");  
+
+}
+// lista por estoque
+void listar_por_estoque(Produto produto[], int max_len, int &qtd)
+{
+    int minima;
+
+    // Le a quantidade minima
+    do
+    {
+        printf("Qtd minima: ");
+        scanf("%d", &minima);
+
+        if (minima < 0)
+            puts("Digite novamente! Quantidade invalida");
+        
+    } while (minima < 0);
+    
+    // Procura os produtos com estoque menor que a quantidade minima e imprime seus dados
+    puts("--------------------------------------------------------");
+    puts("Codigo Descricao                      Categ  Qtd   Preco");
+
+    puts("--------------------------------------------------------");
+
+    for (int i = 0; i < qtd; i++)
+    {
+        if (produto[i].quantidade < minima)
+        {
+            printf("%d %-30s   %c   %4d %7.2f\n", produto[i].codigo, produto[i].descricao, produto[i].categoria, produto[i].quantidade, produto[i].preco);
+        }
+    }
+    
+    puts("--------------------------------------------------------");   
+
+}
+
 // listagem dos produtos 
 void menu_listagem(Produto produto[], int max_len, int &qtd)
 {
+    putchar('\n');
     printf("Menu da Listagem\n");
     printf("1-Listar todos os produtos (ordenado por descricao)\n");
     printf("2-Listar todos os produtos (ordenado por categoria/descricao\n");
@@ -163,9 +467,11 @@ void menu_listagem(Produto produto[], int max_len, int &qtd)
         break;
     
     case 2: // listar por odem de categoria/descricao
+        listar_por_categoria(produto, max_len, qtd);
         break;
 
     case 3: // listar por estoque baixo
+        listar_por_estoque(produto, max_len, qtd);
         break;
 
     case 4: // voltar
@@ -173,6 +479,230 @@ void menu_listagem(Produto produto[], int max_len, int &qtd)
     }
 }
 
+// funções que leem os dados do inclui_produtos
+
+// Lê código
+void le_codigo(Produto produto[], int qtd, int i)
+{
+    int j;
+    int codigo_prod;
+
+    // Le o codigo do produto
+    do
+    {
+        printf("Codigo %d: ", i+1);
+        scanf("%d", &produto[i].codigo);
+
+        if (produto[i].codigo <= 99999 || produto[i].codigo >= 1000000)
+            puts("Codigo invalido: Insira novamente.");
+
+        codigo_prod = produto[i].codigo;
+        for (j = i; j > 0; j--)
+        {
+            if (codigo_prod == produto[j-1].codigo)
+            {
+                puts("Codigo ja existe no sistema");
+                printf("Codigo %d: ", i+1);
+                scanf("%d", &produto[i].codigo);
+                i--;
+            }
+        }
+    } while(produto[i].codigo <= 99999 || produto[i].codigo >= 1000000 || codigo_prod == produto[j-1].codigo);
+}
+
+// Lê descrição
+void le_descricao(Produto produto[], int qtd, int i)
+{
+    do {
+        printf("Descricao %d: ", i+1);
+        gets(produto[i].descricao);
+
+        strupr(produto[i].descricao);
+
+        if (strlen(produto[i].descricao) < 4 || strlen(produto[i].descricao) > 30)
+            puts("Descricao invalida: Insira novamente.");
+
+    } while (strlen(produto[i].descricao) < 4 || strlen(produto[i].descricao) > 30);
+
+    // imprime cada um pra conferir se ta tudo certo
+    for (int i = 0; i < qtd; i++)
+    {
+        puts(produto[i].descricao);
+    }
+}
+
+// Lê categoria
+void le_categoria(Produto produto[], int qtd, int i)
+{
+    do
+        {
+            // getchar();
+            printf("Categoria %d: ", i+1);
+            produto[i].categoria = getchar();
+            
+            if (produto[i].categoria != 'A' && produto[i].categoria != 'B' && produto[i].categoria != 'C' && produto[i].categoria != 'D' && produto[i].categoria != 'E' && produto[i].categoria != 'a' && produto[i].categoria != 'b' && produto[i].categoria != 'c' && produto[i].categoria != 'd' && produto[i].categoria != 'e')
+                printf("Invalido\n"); 
+               
+        } while (produto[i].categoria != 'A' && produto[i].categoria != 'B' && produto[i].categoria != 'C' && produto[i].categoria != 'D' && produto[i].categoria != 'E' && produto[i].categoria != 'a' && produto[i].categoria != 'b' && produto[i].categoria != 'c' && produto[i].categoria != 'd' && produto[i].categoria != 'e');
+
+        int cat = produto[i].categoria;
+        if (cat >= 97 && cat <= 101)
+            produto[i].categoria = toupper(produto[i].categoria);
+    
+    for (int i = 0; i < qtd; i++)
+    {
+        printf("%c ", produto[i].categoria);
+    }
+}
+
+// Lê quantidade
+void le_quantidade(Produto produto[], int qtd, int i)
+{
+    do
+    {
+        printf("Quantidade %d: ", i+1);
+        scanf("%d", &produto[i].quantidade);
+
+        if (produto[i].quantidade <= 0)
+            puts("Quantidade menor ou igual a 0.");
+
+    } while (produto[i].quantidade <= 0);
+}
+
+// Lê preço
+void le_preco(Produto produto[], int qtd, int i)
+{
+    do
+    {
+        printf("Preco %d: ", i+1);
+        scanf("%f", &produto[i].preco);
+
+        if (produto[i].preco <= 0)
+            puts("Preco menor ou igual a 0.");
+
+    } while (produto[i].preco <= 0);
+}
+
+// Abater o estoque
+void abate_estoque(Produto produto[], int max_len, int &qtd)
+{
+  // declaração das variáveis
+    int cod, quantidade;
+
+    printf("Codigo do produto: ");
+    scanf("%d", &cod);
+    printf("Quantidade a abater: ");
+    scanf("%d", &quantidade);
+
+    int pos;
+    int existe_estoque = 0;
+
+    // loop para procurar esse codigo no vetor
+    for (int i = 0; i < qtd; i++)
+    {
+        if (cod == produto[i].codigo)
+        {
+            pos = i;
+            existe_estoque = 1;
+        }
+    }
+
+    if (existe_estoque == 1)
+    {
+        // abate produto quando a quantidade do estoque é maior do que a quantidade que se quer excluir.
+        if (produto[pos].quantidade >= quantidade)
+        {
+            produto[pos].quantidade -= quantidade;
+            printf("Quantidade abatida.\n");
+            printf("Produto %c%s%c agora tem %d em estoque.\n", 34, produto[pos].descricao, 34, produto[pos].quantidade);
+        }
+
+        // qtd para abater quantidade é maior que a quantidade existente em estoque.
+        else if (produto[pos].quantidade < quantidade)
+        {
+            printf("Produto %c%s%c tem somente %d quantidade em estoque!\n", 34, produto[pos].descricao, 34, produto[pos].quantidade);
+        }
+    }
+
+    else
+        printf("Produto nao existe!\n");
+}
+
+// Excluir produto
+void exclui_produto(Produto produto[], int max_len, int &qtd)
+{
+    int produto_excluir;
+
+    puts("Produto a excluir");
+    printf("Codigo: ");
+    scanf("%d", &produto_excluir);
+
+    int pos;
+    int existe = 0;
+    // loop para procurar esse codigo no vetor
+    for (int i = 0; i < qtd; i++)
+        if (produto_excluir == produto[i].codigo)
+        {
+            pos = i;
+            existe = 1;
+        }
+    
+
+    if (existe == 1)
+    {
+        // se a quantidade for > 0, copia o proximo elemento para o atual
+        if (produto[pos].quantidade > 0)
+            printf("Produto %c%s%c tem %d em estoque!", 34, produto[pos].descricao, 34, produto[pos].quantidade);
+
+        else // if quantidade <= 0
+        {
+            for (int i = 0; i < qtd-1; i++)
+                produto[i].codigo = produto[i+1].codigo;
+
+            printf("Produto %c%s%c excluido com sucesso!", 34, produto[pos].descricao, 34);
+
+            // testando
+            for (int i = 0; i < qtd-1; i++)
+            {
+                printf("%d ", produto[i].codigo);
+            }
+        }
+    }
+
+    else
+        printf("Produto nao existe!");
+}
+
+// Incluir produto
+void inclui_produto(Produto produto[], int max_len, int &qtd)
+{
+    int total_qtd = 0;
+
+    printf("Quantidade de produtos: ");
+    scanf("%d", &qtd);
+
+    putchar('\n');
+
+    total_qtd += qtd;
+    if (total_qtd > 50)
+        puts("Limite de estoque é de 50 produtos.");
+    
+    else
+    {
+        for (int i = 0; i < total_qtd; i++)
+        {
+            printf("DADOS DO PRODUTO %d\n", i+1);
+            le_codigo(produto, qtd, i);
+            getchar();
+            le_descricao(produto, qtd, i);
+            le_categoria(produto, qtd, i);
+            le_quantidade(produto, qtd, i);
+            le_preco(produto, qtd, i);
+            printf("Produto cadastrado com sucesso!\n");
+            putchar('\n');
+        }
+    }
+}
 
 int main()
 {
@@ -193,6 +723,8 @@ int main()
 
         printf("Qual operacao voce deseja realizar? ");
         scanf("%d", &opcao);
+
+        putchar('\n');
 
         switch (opcao)
         {
@@ -224,4 +756,3 @@ int main()
         }
     } while (opcao != 6);
 }
-
